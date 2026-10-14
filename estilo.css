@@ -924,6 +924,16 @@ th:nth-child(9), td:nth-child(9) { width: 14%; } /* ENCERRAMENTO */
     font-weight: 700;
 }
 
+footer a {
+
+    color: inherit;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
 @media (max-width: 600px) {
     .controls {
         width: 100%;
