@@ -1,0 +1,6 @@
+{
+  "name": "CAF - Programação Inteligente de Escalas",
+  "description": "Sistema de gestão de escalas e programação operacional com rodízio inteligente, sincronização de tarefas e redistribuição automática de férias.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

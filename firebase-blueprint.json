@@ -1,0 +1,33 @@
+{
+  "entities": {
+    "Escala": {
+      "title": "Escala",
+      "description": "Dados sincronizados da escala de trabalho e ausências de colaboradores",
+      "type": "object",
+      "properties": {
+        "substituicoes": {
+          "type": "object",
+          "description": "Substituicoes manuais ou automaticas por data e funcao"
+        },
+        "ausencias": {
+          "type": "array",
+          "description": "Lista de ausencias registradas (ferias, folga, ausencia)"
+        },
+        "ultimaModificacao": {
+          "type": "string",
+          "description": "Timestamp ISO da ultima modificacao"
+        },
+        "modificadoPor": {
+          "type": "string",
+          "description": "Nome ou identificador de quem fez a alteracao"
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/escalas/{escalaId}": {
+      "schema": "Escala",
+      "description": "Colecao contendo os dados da escala compartilhada entre todos os colaboradores"
+    }
+  }
+}

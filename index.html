@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color" content="#0f172a">
+    <meta name="description" content="CAF - Sistema Inteligente de Programação e Escalas">
+    <meta name="author" content="CAF">
+
+    <title>CAF • Programação Inteligente de Escalas</title>
+
+    <link rel="stylesheet" href="/estilo.css">
+
+    <!-- Firebase SDK para Sincronização em Tempo Real (compatível com GitHub Pages, Servidor e Celular) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+    <!-- Bibliotecas para Exportação Direta no Navegador -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+
+    <!-- Código Principal Vanilla JavaScript -->
+    <script src="/javascript.js" defer></script>
+</head>
+
+<body>
+
+    <div class="ai-background" aria-hidden="true">
+        <div class="ai-grid"></div>
+        <div class="ai-glow ai-glow-1"></div>
+        <div class="ai-glow ai-glow-2"></div>
+    </div>
+
+    <main class="dashboard">
+
+        <!-- =====================================================
+             TOPBAR / CABEÇALHO
+        ====================================================== -->
+        <header class="topbar">
+
+            <div class="logo">
+                <div class="logo-box">
+                    <span>CAF</span>
+                </div>
+
+                <div class="logo-info">
+                    <div class="system-status">
+                        <span class="status-online"></span>
+                        SISTEMA ONLINE & SINCRONIZADO
+                    </div>
+
+                    <h1>
+                        Programação
+                        <span>Mensal</span>
+                    </h1>
+
+                    <p>Escala Operacional Automatizada</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label for="mes">Mês</label>
+                    <select id="mes" class="select-input"></select>
+                </div>
+
+                <div class="control-group">
+                    <label for="ano">Ano</label>
+                    <select id="ano" class="select-input">
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                        <option value="2029">2029</option>
+                        <option value="2030">2030</option>
+                    </select>
+                </div>
+
+                <button id="btnGestaoEscala" class="btn btn-gestao" type="button" title="Gerenciar Férias, Folgas e Ausências">
+                    📋 Gestão de Escala
+                </button>
+
+                <button id="btnTema" class="btn" type="button">
+                    🌙 Modo Escuro
+                </button>
+
+                <button id="btnExcel" class="btn" type="button" title="Exportar planilha Excel">
+                    📊 Excel
+                </button>
+
+                <button id="btnPDF" class="btn" type="button" title="Exportar relatório PDF">
+                    📄 PDF
+                </button>
+
+                <button id="btnRestaurarMes" class="btn btn-danger" type="button" title="Restaurar escala padrão do mês">
+                    ↺ Restaurar Mês
+                </button>
+            </div>
+
+        </header>
+
+        <!-- =====================================================
+             BANNER DA CAMPANHA DO MÊS (CORES E CONSCIENTIZAÇÃO)
+        ====================================================== -->
+        <div id="bannerCampanhaMes" class="banner-campanha-container"></div>
+
+        <!-- =====================================================
+             BANNER DE REGRAS OPERACIONAIS
+        ====================================================== -->
+        <div class="sync-badge-info">
+            <div class="badge-left">
+                <span id="liveSyncStatus" class="live-sync-indicator" title="Sincronização em tempo real ativa entre todos os computadores">
+                    <span class="live-pulse"></span>
+                    <span id="liveSyncText">Ao vivo: Sincronizado para todos os colaboradores</span>
+                </span>
+                <span>⚡ Regras:</span>
+                E-MAIL e V360 sincronizados • Rodízio diário sem repetição consecutiva • Em ausências: E-mail assume 3 tarefas e outro 4
+            </div>
+            <div class="badge-rules">
+                <span>🛡️ Girlene Fixa Service Now</span>
+                <span>📋 Férias/Folgas gerenciáveis</span>
+            </div>
+        </div>
+
+        <!-- =====================================================
+             CARDS DE STATUS
+        ====================================================== -->
+        <section class="status-bar">
+
+            <article class="status-card">
+                <div class="status-icon">
+                    <span>▦</span>
+                </div>
+                <div class="status-content">
+                    <h2>DIAS ÚTEIS</h2>
+                    <p id="diasMes">0</p>
+                </div>
+            </article>
+
+            <article class="status-card">
+                <div class="status-icon">
+                    <span>◈</span>
+                </div>
+                <div class="status-content">
+                    <h2 id="labelFeriado">FERIADOS</h2>
+                    <p id="feriadosMes">0</p>
+                </div>
+            </article>
+
+            <article class="status-card status-email">
+                <div class="status-icon">
+                    <span>✉</span>
+                </div>
+                <div class="status-content">
+                    <h2>E-MAIL & V360 DE HOJE</h2>
+                    <p id="ultimoEmail" class="status-person">-</p>
+                    <span id="v360HojeInfo" class="status-sub"></span>
+                </div>
+            </article>
+
+        </section>
+
+        <!-- =====================================================
+             TABELA PRINCIPAL DE PROGRAMAÇÃO
+        ====================================================== -->
+        <section class="table-card">
+
+            <div class="table-header">
+                <div class="table-heading">
+                    <p id="tableSubtitle" class="table-subtitle">
+                        Programação Operacional Mensal
+                    </p>
+                </div>
+
+                <div class="table-tools">
+                    <span style="font-size: 11px; color: var(--muted); font-weight: 700;">
+                        ✎ Clique em qualquer célula para substituir colaborador
+                    </span>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="tabelaProgramacao">
+                    <thead>
+                        <tr>
+                            <th>DATA</th>
+                            <th>E-MAIL ⇄</th>
+                            <th>RETORNO</th>
+                            <th>FIELDGLASS</th>
+                            <th>FUP</th>
+                            <th>SERVICE NOW 🛡️</th>
+                            <th>V360 ⇄</th>
+                            <th>SPOT MATERIAIS</th>
+                            <th>ENCERRAMENTO</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyProgramacao"></tbody>
+                </table>
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             RODAPÉ
+        ====================================================== -->
+        <footer class="system-footer">
+            <div>
+                © CAF • Programação Inteligente de Escalas <span id="systemYear"></span>
+            </div>
+
+            <div class="footer-badges">
+                <span class="footer-tag" style="color: #9333ea;">
+                    🛡️ Girlene Fixa Service Now
+                </span>
+                •
+                <span class="footer-tag" style="color: #2563eb;">
+                    ⇄ E-mail e V360 Sincronizados
+                </span>
+                •
+                <span class="footer-tag" style="color: #059669;">
+                    ✓ Zero Consecutivos E-mail
+                </span>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- =====================================================
+         MODAL DE SUBSTITUIÇÃO COM SINCRONIZAÇÃO INTELIGENTE
+    ====================================================== -->
+    <div id="modalSubstituicao" class="modal-overlay" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-label">GESTÃO DE ESCALA</span>
+                    <h2 id="modalTitulo">Substituir Colaborador</h2>
+                </div>
+                <button id="btnFecharModal" class="modal-close" type="button" aria-label="Fechar">
+                    ×
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-info">
+                    <div class="info-item">
+                        <span>DATA</span>
+                        <strong id="modalData">-</strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span>ATIVIDADE</span>
+                        <strong id="modalAtividade" style="color: var(--primary);">-</strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span>ATUAL</span>
+                        <strong id="modalColaboradorAtual">-</strong>
+                    </div>
+                </div>
+
+                <!-- Aviso de Não Repetição em E-mail -->
+                <div id="modalWarningEmailConsecutivo" class="modal-warning-box"></div>
+
+                <!-- Box de Sincronização Automática E-MAIL ⇄ V360 -->
+                <div id="modalSyncBox" class="modal-sync-box" style="display: none;">
+                    <div class="modal-sync-title">
+                        ⚡ Regra de Sincronização Automática
+                    </div>
+                    <div id="modalSyncText" class="modal-sync-desc">
+                        As tratativas de E-MAIL e V360 são vinculadas para o mesmo colaborador.
+                    </div>
+                    <label class="modal-sync-checkbox">
+                        <input type="checkbox" id="checkSyncPar" checked>
+                        <span>Sincronizar automaticamente para o mesmo colaborador</span>
+                    </label>
+                </div>
+
+                <label class="modal-select-label" for="selectSubstituto">
+                    Novo Colaborador
+                </label>
+                <select id="selectSubstituto" class="modal-select"></select>
+
+                <div class="modal-actions">
+                    <button id="btnCancelarModal" class="btn-modal btn-modal-sec" type="button">
+                        Cancelar
+                    </button>
+
+                    <button id="btnRestaurarCelula" class="btn-modal btn-modal-warn" type="button">
+                        Restaurar Original
+                    </button>
+
+                    <button id="btnSalvarSubstituicao" class="btn-modal btn-modal-pri" type="button">
+                        Salvar Alteração
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         MODAL DE GESTÃO DE ESCALA (FÉRIAS, FOLGA, AUSÊNCIA)
+    ====================================================== -->
+    <div id="modalGestao" class="modal-overlay" aria-hidden="true">
+        <div class="modal modal-lg" role="dialog" aria-modal="true">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-label">GESTÃO DE ESCALA OPERACIONAL</span>
+                    <h2>Férias, Folgas e Ausências</h2>
+                </div>
+                <button id="btnFecharModalGestao" class="modal-close" type="button" aria-label="Fechar">
+                    ×
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Informação da Lógica -->
+                <div style="background: rgba(37, 99, 235, 0.06); padding: 12px; border-radius: 10px; border: 1px solid rgba(37, 99, 235, 0.2); margin-bottom: 16px; font-size: 11.5px; line-height: 1.45;">
+                    <strong style="color: var(--primary); display: block; margin-bottom: 3px;">
+                        Redistribuição Automática Ativa (3 e 4 atribuições):
+                    </strong>
+                    Ao ativar uma ausência (ex: Adri de férias), a escala redistribui as 7 tarefas: quem fica no <strong>E-mail</strong> assume <strong>3 atribuições</strong> (E-mail, V360 e Spot); o outro colaborador assume as <strong>4 atribuições</strong> (Retorno, Fieldglass, FUP e Encerramento). <strong>Girlene permanece 100% fixa no ServiceNow</strong> e <strong>nunca o mesmo colaborador fica 2 dias seguidos no E-mail</strong>.
+                </div>
+
+                <!-- Formulário de Nova Ausência -->
+                <div style="background: var(--hover); padding: 14px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 16px;">
+                    <h3 style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--muted); margin-bottom: 10px;">
+                        Adicionar Nova Ausência
+                    </h3>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 10px;">
+                        <div>
+                            <label class="modal-select-label">Colaborador</label>
+                            <select id="selectAusenciaColaborador" class="modal-select" style="margin-bottom: 0;">
+                                <option value="Adri">Adri</option>
+                                <option value="Leto">Leto</option>
+                                <option value="Duda">Duda</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="modal-select-label">Tipo de Ausência</label>
+                            <select id="selectAusenciaTipo" class="modal-select" style="margin-bottom: 0;">
+                                <option value="ferias">🏖️ Férias</option>
+                                <option value="folga">🌴 Folga</option>
+                                <option value="ausencia">⚠️ Ausência</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="modal-select-label">Data Início</label>
+                            <input type="date" id="inputAusenciaInicio" class="modal-input" style="margin-bottom: 0;">
+                        </div>
+
+                        <div>
+                            <label class="modal-select-label">Data Fim</label>
+                            <input type="date" id="inputAusenciaFim" class="modal-input" style="margin-bottom: 0;">
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <label class="modal-select-label">Motivo / Observação (Opcional)</label>
+                        <input type="text" id="inputAusenciaMotivo" class="modal-input" placeholder="Ex: Férias regulamentares, plantão compensatório..." style="margin-bottom: 0;">
+                    </div>
+
+                    <div style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
+                        <button id="btnPredefinirFeriasAdri" type="button" class="btn-modal btn-modal-warn" style="font-size: 10.5px;">
+                            🏖️ Atalho: Férias Adri (13/10 a 27/10)
+                        </button>
+                        <button id="btnAdicionarAusencia" type="button" class="btn-modal btn-modal-pri">
+                            + Ativar na Escala
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lista de Ausências Cadastradas -->
+                <div class="ausencias-list">
+                    <h3>Ausências Cadastradas</h3>
+                    <div id="listaAusenciasCadastradas">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Sincronização / Compartilhamento GitHub -->
+                <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <span style="font-size: 11px; font-weight: 800; color: var(--text); display: block;">
+                            Sincronização & GitHub
+                        </span>
+                        <span style="font-size: 10px; color: var(--muted);">
+                            Exporte ou importe a escala para compartilhar com todos no GitHub.
+                        </span>
+                    </div>
+
+                    <div style="display: flex; gap: 8px;">
+                        <input type="file" id="fileInputJson" accept=".json" style="display: none;">
+                        <button id="btnImportarJson" class="btn-modal btn-modal-sec" type="button" style="font-size: 10.5px;">
+                            📥 Importar JSON
+                        </button>
+                        <button id="btnExportarJson" class="btn-modal btn-modal-pri" type="button" style="font-size: 10.5px;">
+                            📤 Exportar JSON
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         TOAST DE NOTIFICAÇÃO
+    ====================================================== -->
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+</body>
+</html>
